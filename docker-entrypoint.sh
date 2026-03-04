@@ -11,16 +11,15 @@ fi
 # Ensure BRIDGE_BIND is set to 0.0.0.0 so Railway's healthcheck can reach it.
 export BRIDGE_BIND="${BRIDGE_BIND:-0.0.0.0}"
 
-STATE_DIR="${BRIDGE_STATE_DIR:-/data}"
-PROFILE_DIR="${BRIDGE_PROFILE:-/data/chrome-profile}"
+STATE_DIR="${BRIDGE_STATE_DIR:-/tmp/pinchtab-state}"
+PROFILE_DIR="${BRIDGE_PROFILE:-/tmp/chrome-profile}"
 
-# Wipe Chrome profile on every start so stale/locked state from a previous
-# deployment never causes launch failures.
-echo "Clearing Chrome profile at ${PROFILE_DIR}..."
+# /tmp is always writable; wipe any leftover Chrome state from a previous run.
 rm -rf "${PROFILE_DIR}"
-
-# (Re-)create fresh directories — safe now that we run as root.
-mkdir -p "${STATE_DIR}"
 mkdir -p "${PROFILE_DIR}"
+
+# State dir: always create it. For /tmp paths this is guaranteed to succeed.
+# For volume paths (/data) this also works once Railway makes the volume writable.
+mkdir -p "${STATE_DIR}"
 
 exec /usr/bin/dumb-init -- pinchtab "$@"

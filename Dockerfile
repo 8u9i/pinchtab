@@ -39,16 +39,19 @@ WORKDIR /data
 
 # Environment variables.
 # PORT default lets Railway override it cleanly at runtime (Railway injects PORT as an integer).
-# HOME=/data ensures config + state land on the persistent volume mount.
+# BRIDGE_STATE_DIR defaults to /tmp/pinchtab-state (always writable, no volume required).
+# Set BRIDGE_STATE_DIR=/data in Railway Variables when a Volume is attached at /data
+# to persist profiles and state across deploys.
+# HOME=/data only matters when a volume is present; /tmp is fine otherwise.
 ENV PORT=9867 \
     BRIDGE_BIND=0.0.0.0 \
     BRIDGE_PORT=9867 \
     BRIDGE_HEADLESS=true \
-    BRIDGE_STATE_DIR=/data \
-    BRIDGE_PROFILE=/data/chrome-profile \
+    BRIDGE_STATE_DIR=/tmp/pinchtab-state \
+    BRIDGE_PROFILE=/tmp/chrome-profile \
     CHROME_BINARY=/usr/bin/chromium-browser \
     CHROME_FLAGS="--no-sandbox --disable-gpu --disable-dev-shm-usage" \
-    HOME=/data
+    HOME=/root
 
 # EXPOSE is informational; Railway routes traffic to $PORT.
 EXPOSE 9867
