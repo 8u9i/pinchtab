@@ -48,6 +48,13 @@ func LoggingMiddleware(next http.Handler) http.Handler {
 func AuthMiddleware(cfg *config.RuntimeConfig, next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if cfg.Token != "" {
+			// Allow health and metrics endpoints without auth so Railway's
+			// healthcheck (and monitoring tools) can reach them unauthenticated.
+			p := strings.TrimSpace(r.URL.Path)
+			if p == "/health" || p == "/metrics" || strings.HasPrefix(p, "/health/") || strings.HasPrefix(p, "/metrics/") {
+				next.ServeHTTP(w, r)
+				return
+			}
 			auth := r.Header.Get("Authorization")
 			if auth == "" {
 				w.Header().Set("WWW-Authenticate", `Bearer realm="pinchtab", error="missing_token"`)
