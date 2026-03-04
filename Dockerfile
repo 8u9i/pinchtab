@@ -1,9 +1,21 @@
-# Build stage
+# Dashboard build stage — builds React app inside Docker so gitignored dist
+# files are never needed in the build context.
+FROM oven/bun:1-alpine AS dashboard-builder
+WORKDIR /app
+COPY dashboard/package.json dashboard/bun.lock* ./
+RUN bun install --frozen-lockfile 2>/dev/null || bun install
+COPY dashboard/ ./
+RUN bun run build --outDir dist 2>/dev/null || bunx vite build
+
+# Go build stage
 FROM golang:1.26-alpine AS builder
 WORKDIR /build
 COPY go.mod go.sum ./
 RUN go mod download
 COPY . .
+# Copy built dashboard assets into the Go embed path and rename as Go expects.
+COPY --from=dashboard-builder /app/dist/ ./internal/dashboard/dashboard/
+RUN mv internal/dashboard/dashboard/index.html internal/dashboard/dashboard/dashboard.html 2>/dev/null || true
 RUN go build -ldflags="-s -w" -o pinchtab ./cmd/pinchtab
 
 # Runtime stage
