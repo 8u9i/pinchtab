@@ -11,8 +11,16 @@ fi
 # Ensure BRIDGE_BIND is set to 0.0.0.0 so Railway's healthcheck can reach it.
 export BRIDGE_BIND="${BRIDGE_BIND:-0.0.0.0}"
 
-# Ensure state/profile directories exist (volume may be freshly mounted).
-mkdir -p "${BRIDGE_STATE_DIR:-/data}"
-mkdir -p "${BRIDGE_PROFILE:-/data/chrome-profile}"
+STATE_DIR="${BRIDGE_STATE_DIR:-/data}"
+PROFILE_DIR="${BRIDGE_PROFILE:-/data/chrome-profile}"
+
+# Wipe Chrome profile on every start so stale/locked state from a previous
+# deployment never causes launch failures.
+echo "Clearing Chrome profile at ${PROFILE_DIR}..."
+rm -rf "${PROFILE_DIR}"
+
+# (Re-)create fresh directories — safe now that we run as root.
+mkdir -p "${STATE_DIR}"
+mkdir -p "${PROFILE_DIR}"
 
 exec /usr/bin/dumb-init -- pinchtab "$@"

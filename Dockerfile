@@ -23,11 +23,6 @@ RUN apk add --no-cache \
     ttf-freefont \
     dumb-init
 
-# Create non-root user and state directory
-RUN adduser -D -g '' pinchtab && \
-    mkdir -p /data && \
-    chown pinchtab:pinchtab /data
-
 # Copy binary from builder
 COPY --from=builder /build/pinchtab /usr/local/bin/pinchtab
 
@@ -37,8 +32,9 @@ RUN sed -i '1s/^\xEF\xBB\xBF//' /usr/local/bin/docker-entrypoint.sh \
     && sed -i 's/\r//' /usr/local/bin/docker-entrypoint.sh \
     && chmod +x /usr/local/bin/docker-entrypoint.sh
 
-# Switch to non-root user
-USER pinchtab
+# Run as root — Railway volumes are mounted root-owned at runtime;
+# --no-sandbox is already required for Chrome so the non-root isolation
+# benefit is moot. Running as root avoids permission errors on the volume.
 WORKDIR /data
 
 # Environment variables.
