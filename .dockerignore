@@ -27,3 +27,6 @@ docs/
 # Development
 node_modules/
 *.log
+
+# Explicitly keep embedded Go static assets (*.js is ignored by .gitignore).
+!internal/assets/*.js
