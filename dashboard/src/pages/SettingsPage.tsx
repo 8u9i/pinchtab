@@ -58,9 +58,13 @@ export default function SettingsPage() {
       <div className="mx-auto w-full max-w-2xl space-y-6 p-6">
         {/* Auth Token */}
         <Card className="p-4">
-          <h3 className="mb-1 text-sm font-semibold text-text-primary">🔑 Auth Token</h3>
+          <h3 className="mb-1 text-sm font-semibold text-text-primary">
+            🔑 Auth Token
+          </h3>
           <p className="mb-3 text-xs text-text-muted">
-            Required when the server is started with <code className="text-primary">BRIDGE_TOKEN</code>. Stored in localStorage only.
+            Required when the server is started with{" "}
+            <code className="text-primary">BRIDGE_TOKEN</code>. Stored in
+            localStorage only.
           </p>
           <div className="flex gap-2">
             <input
@@ -78,7 +82,9 @@ export default function SettingsPage() {
             </button>
           </div>
           {token && (
-            <p className="mt-1.5 text-xs text-green-500">✓ Token set — hit Apply Settings to save</p>
+            <p className="mt-1.5 text-xs text-green-500">
+              ✓ Token set — hit Apply Settings to save
+            </p>
           )}
         </Card>
 
