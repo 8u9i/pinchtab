@@ -2,11 +2,13 @@ import { useEffect, useState, useMemo } from "react";
 import { useAppStore } from "../stores/useAppStore";
 import { Button, Card } from "../components/atoms";
 import * as api from "../services/api";
+import { getToken, setToken } from "../services/api";
 import type { Settings } from "../types";
 
 export default function SettingsPage() {
   const { settings, serverInfo, setSettings, setServerInfo } = useAppStore();
   const [local, setLocal] = useState<Settings>(settings);
+  const [token, setLocalToken] = useState<string>(getToken);
 
   // Check if settings have changed
   const hasChanges = useMemo(
@@ -31,6 +33,7 @@ export default function SettingsPage() {
   const handleSave = () => {
     // Settings are persisted to localStorage via setSettings
     setSettings(local);
+    setToken(token);
   };
 
   const handleReset = () => setLocal(settings);
@@ -53,6 +56,32 @@ export default function SettingsPage() {
       </div>
 
       <div className="mx-auto w-full max-w-2xl space-y-6 p-6">
+        {/* Auth Token */}
+        <Card className="p-4">
+          <h3 className="mb-1 text-sm font-semibold text-text-primary">🔑 Auth Token</h3>
+          <p className="mb-3 text-xs text-text-muted">
+            Required when the server is started with <code className="text-primary">BRIDGE_TOKEN</code>. Stored in localStorage only.
+          </p>
+          <div className="flex gap-2">
+            <input
+              type="password"
+              placeholder="Bearer token…"
+              value={token}
+              onChange={(e) => setLocalToken(e.target.value)}
+              className="flex-1 rounded border border-border-default bg-bg-elevated px-3 py-1.5 text-sm text-text-primary placeholder-text-muted focus:border-primary focus:outline-none"
+            />
+            <button
+              onClick={() => setLocalToken("")}
+              className="rounded border border-border-default bg-bg-elevated px-3 py-1.5 text-xs text-text-muted hover:text-text-primary"
+            >
+              Clear
+            </button>
+          </div>
+          {token && (
+            <p className="mt-1.5 text-xs text-green-500">✓ Token set — hit Apply Settings to save</p>
+          )}
+        </Card>
+
         {/* Screencast */}
         <Card className="p-4">
           <h3 className="mb-4 text-sm font-semibold text-text-primary">

@@ -48,10 +48,14 @@ func LoggingMiddleware(next http.Handler) http.Handler {
 func AuthMiddleware(cfg *config.RuntimeConfig, next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if cfg.Token != "" {
-			// Allow health and metrics endpoints without auth so Railway's
-			// healthcheck (and monitoring tools) can reach them unauthenticated.
+			// Allow health, metrics, and dashboard static assets without auth.
+			// /health + /metrics: Railway healthcheck and monitoring tools.
+			// /dashboard/ assets: the React app HTML/JS/CSS must load so the
+			// browser can render the token input in Settings before any API call.
 			p := strings.TrimSpace(r.URL.Path)
-			if p == "/health" || p == "/metrics" || strings.HasPrefix(p, "/health/") || strings.HasPrefix(p, "/metrics/") {
+			if p == "/health" || p == "/metrics" ||
+				strings.HasPrefix(p, "/health/") || strings.HasPrefix(p, "/metrics/") ||
+				strings.HasPrefix(p, "/dashboard/") || p == "/dashboard" {
 				next.ServeHTTP(w, r)
 				return
 			}
