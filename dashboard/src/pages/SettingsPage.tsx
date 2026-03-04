@@ -12,7 +12,9 @@ export default function SettingsPage() {
 
   // Check if settings have changed (including token)
   const hasChanges = useMemo(
-    () => JSON.stringify(local) !== JSON.stringify(settings) || token !== getToken(),
+    () =>
+      JSON.stringify(local) !== JSON.stringify(settings) ||
+      token !== getToken(),
     [local, settings, token],
   );
 
@@ -36,7 +38,10 @@ export default function SettingsPage() {
     setToken(token);
   };
 
-  const handleReset = () => { setLocal(settings); setLocalToken(getToken()); };
+  const handleReset = () => {
+    setLocal(settings);
+    setLocalToken(getToken());
+  };
 
   return (
     <div className="flex flex-1 flex-col overflow-auto">
