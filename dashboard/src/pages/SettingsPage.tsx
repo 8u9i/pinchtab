@@ -10,10 +10,10 @@ export default function SettingsPage() {
   const [local, setLocal] = useState<Settings>(settings);
   const [token, setLocalToken] = useState<string>(getToken);
 
-  // Check if settings have changed
+  // Check if settings have changed (including token)
   const hasChanges = useMemo(
-    () => JSON.stringify(local) !== JSON.stringify(settings),
-    [local, settings],
+    () => JSON.stringify(local) !== JSON.stringify(settings) || token !== getToken(),
+    [local, settings, token],
   );
 
   // Load server info on mount (settings come from localStorage via store)
@@ -36,7 +36,7 @@ export default function SettingsPage() {
     setToken(token);
   };
 
-  const handleReset = () => setLocal(settings);
+  const handleReset = () => { setLocal(settings); setLocalToken(getToken()); };
 
   return (
     <div className="flex flex-1 flex-col overflow-auto">
