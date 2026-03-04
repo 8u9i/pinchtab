@@ -189,7 +189,11 @@ func (d *Dashboard) handleDashboardUI(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Cache-Control", "no-store")
 	w.Header().Set("Pragma", "no-cache")
 	w.Header().Set("Expires", "0")
-	data, _ := dashboardFS.ReadFile("dashboard/dashboard.html")
+	// Try index.html first (Vite default), fall back to dashboard.html (legacy rename).
+	data, err := dashboardFS.ReadFile("dashboard/index.html")
+	if err != nil {
+		data, _ = dashboardFS.ReadFile("dashboard/dashboard.html")
+	}
 	_, _ = w.Write(data)
 }
 
