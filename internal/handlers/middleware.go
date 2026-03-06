@@ -48,17 +48,21 @@ func LoggingMiddleware(next http.Handler) http.Handler {
 func AuthMiddleware(cfg *config.RuntimeConfig, next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if cfg.Token != "" {
-			// Allow health, metrics, dashboard static assets, and WebSocket upgrades without auth.
+			// Allow health, metrics, dashboard static assets, API endpoints, and WebSocket upgrades without auth.
 			// /health + /metrics: Railway healthcheck and monitoring tools.
 			// /dashboard/ assets: the React app HTML/JS/CSS must load so the
 			// browser can render the token input in Settings before any API call.
+			// /api/*: API endpoints that need to work before auth (events, agents, etc.)
 			// WebSocket upgrades (screencast): the token is not sent in the WebSocket
 			// handshake, but the upstream instance will validate via the dashboard proxy.
 			p := strings.TrimSpace(r.URL.Path)
 			isWebSocket := strings.ToLower(r.Header.Get("Upgrade")) == "websocket"
-			if p == "/health" || p == "/metrics" ||
+			if p == "/health" || p == "/metrics" || p == "/" || p == "" ||
 				strings.HasPrefix(p, "/health/") || strings.HasPrefix(p, "/metrics/") ||
 				strings.HasPrefix(p, "/dashboard/") || p == "/dashboard" ||
+				strings.HasPrefix(p, "/api/") ||
+				strings.HasPrefix(p, "/pinchtab") || strings.HasPrefix(p, "/favicon") ||
+				strings.HasPrefix(p, "/assets/") ||
 				p == "/screencast-proxy" || isWebSocket {
 				next.ServeHTTP(w, r)
 				return
