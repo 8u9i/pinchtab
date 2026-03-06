@@ -6,6 +6,7 @@
 - [x] 2. Update `dashboard/src/components/molecules/ScreencastTile.tsx` - Replace hardcoded localhost WebSocket with relative path via proxy
 - [x] 3. Update `cmd/pinchtab/cmd_dashboard.go` - Add WebSocket proxy endpoint (/screencast-proxy) and update log message for Railway
 - [x] 4. Update `internal/config/config_test.go` - Update test to expect "0.0.0.0" as default
+- [x] 5. Update `internal/handlers/middleware.go` - Allow WebSocket and /screencast-proxy without auth (needed for Railway)
 
 ## Notes:
 
