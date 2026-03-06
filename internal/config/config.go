@@ -142,7 +142,7 @@ type FileConfig struct {
 
 func Load() *RuntimeConfig {
 	cfg := &RuntimeConfig{
-		Bind:              envOr("BRIDGE_BIND", "127.0.0.1"),
+		Bind:              envOr("BRIDGE_BIND", "0.0.0.0"),
 		Port:              envOr("BRIDGE_PORT", "9867"),
 		InstancePortStart: envIntOr("INSTANCE_PORT_START", 9868),
 		InstancePortEnd:   envIntOr("INSTANCE_PORT_END", 9968),

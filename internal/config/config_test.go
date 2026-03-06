@@ -98,8 +98,8 @@ func TestLoadConfigDefaults(t *testing.T) {
 	if cfg.Port != "9867" {
 		t.Errorf("default Port = %v, want 9867", cfg.Port)
 	}
-	if cfg.Bind != "127.0.0.1" {
-		t.Errorf("default Bind = %v, want 127.0.0.1", cfg.Bind)
+	if cfg.Bind != "0.0.0.0" {
+		t.Errorf("default Bind = %v, want 0.0.0.0", cfg.Bind)
 	}
 }
 

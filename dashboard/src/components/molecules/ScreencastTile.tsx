@@ -34,8 +34,16 @@ export default function ScreencastTile({
     const ctx = canvas.getContext("2d");
     if (!ctx) return;
 
-    // Connect directly to instance's screencast WebSocket
-    const wsUrl = `ws://localhost:${instancePort}/screencast?tabId=${encodeURIComponent(tabId)}&quality=${quality}&maxWidth=${maxWidth}&fps=${fps}`;
+    // Connect via proxy endpoint for Railway compatibility
+    // Uses /screencast-proxy?port=... instead of direct localhost WebSocket
+    const queryParams = new URLSearchParams({
+      port: instancePort,
+      tabId: tabId,
+      quality: quality.toString(),
+      maxWidth: maxWidth.toString(),
+      fps: fps.toString(),
+    });
+    const wsUrl = `ws://${window.location.host}/screencast-proxy?${queryParams}`;
 
     const socket = new WebSocket(wsUrl);
     socket.binaryType = "arraybuffer";

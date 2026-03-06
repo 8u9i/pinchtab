@@ -110,6 +110,33 @@ func runDashboard(cfg *config.RuntimeConfig) {
 		})
 	}
 
+	// WebSocket proxy for screencast - accepts port as query param for Railway compatibility
+	mux.HandleFunc("GET /screencast-proxy", func(w http.ResponseWriter, r *http.Request) {
+		port := r.URL.Query().Get("port")
+		if port == "" {
+			// Fallback to first running instance
+			target := orch.FirstRunningURL()
+			if target == "" {
+				web.Error(w, 503, fmt.Errorf("no running instances"))
+				return
+			}
+			// Extract port from URL like http://localhost:9868
+			if idx := strings.LastIndex(target, ":"); idx >= 0 {
+				port = target[idx+1:]
+			}
+		}
+		targetURL := fmt.Sprintf("http://localhost:%s/screencast", port)
+		if r.URL.RawQuery != "" {
+			// Reconstruct query without the port param for the upstream
+			values := r.URL.Query()
+			values.Del("port")
+			if len(values) > 0 {
+				targetURL += "?" + values.Encode()
+			}
+		}
+		handlers.ProxyWebSocket(w, r, targetURL)
+	})
+
 	handler := handlers.LoggingMiddleware(handlers.CorsMiddleware(handlers.AuthMiddleware(cfg, mux)))
 
 	srv := &http.Server{
@@ -194,7 +221,13 @@ func runDashboard(cfg *config.RuntimeConfig) {
 	// Periodic health check: log tabs and Chrome process info every 30 seconds
 	go periodicHealthCheck(orch)
 
-	slog.Info("dashboard ready", "url", fmt.Sprintf("http://localhost:%s", dashPort))
+	// Log server URL - Railway provides PORT env var
+	railwayPort := os.Getenv("PORT")
+	if railwayPort != "" {
+		slog.Info("dashboard ready", "url", fmt.Sprintf("https://%s", os.Getenv("RAILWAY_PUBLIC_DOMAIN")))
+	} else {
+		slog.Info("dashboard ready", "url", fmt.Sprintf("http://localhost:%s", dashPort))
+	}
 
 	if err := srv.ListenAndServe(); err != http.ErrServerClosed {
 		slog.Error("server", "err", err)
