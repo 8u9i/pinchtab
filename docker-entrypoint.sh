@@ -15,6 +15,10 @@ if [ -z "${PINCHTAB_CONFIG:-}" ] && [ ! -f "$default_config_path" ]; then
   /usr/local/bin/pinchtab config init >/dev/null
   # Docker containers need to bind to 0.0.0.0 for port publishing to work
   /usr/local/bin/pinchtab config set server.bind "0.0.0.0" >/dev/null
+  # Railway injects PORT env var — override the default port if set
+  if [ -n "${PORT:-}" ]; then
+    /usr/local/bin/pinchtab config set server.port "$PORT" >/dev/null
+  fi
   if [ -n "${PINCHTAB_TOKEN:-}" ]; then
     /usr/local/bin/pinchtab config set server.token "$PINCHTAB_TOKEN" >/dev/null
   fi
