@@ -10,7 +10,7 @@ import (
 
 func isPublicDashboardPath(path string) bool {
 	switch path {
-	case "/", "/login", "/dashboard", "/dashboard/":
+	case "/", "/login", "/dashboard", "/dashboard/", "/health":
 		return true
 	}
 	return strings.HasPrefix(path, "/dashboard/") || path == "/dashboard/favicon.png"
