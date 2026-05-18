@@ -22,6 +22,8 @@ if [ -z "${PINCHTAB_CONFIG:-}" ] && [ ! -f "$default_config_path" ]; then
   if [ -n "${PINCHTAB_TOKEN:-}" ]; then
     /usr/local/bin/pinchtab config set server.token "$PINCHTAB_TOKEN" >/dev/null
   fi
+  # Trust reverse proxy headers (Railway edge sets X-Forwarded-*)
+  /usr/local/bin/pinchtab config set server.trustProxyHeaders true >/dev/null
 fi
 
 exec "$@"
