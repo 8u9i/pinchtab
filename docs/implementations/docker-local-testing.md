@@ -123,4 +123,4 @@ The E2E stack (`tests/e2e/docker-compose.yml`, `tests/e2e/docker-compose-multi.y
 
 The Docker runtime path owns `--no-sandbox` compatibility now (added at launch when a container is detected). Do not put it in `browser.extraFlags`; config validation rejects it.
 
-`docker-entrypoint.sh` checks for an existing config at `$XDG_CONFIG_HOME/pinchtab/config.json` (`/data/.config/...`), but the binary reads and writes `/data/.pinchtab/config.json`, so the "first boot" block runs on every start: `server.bind` is re-set to `0.0.0.0` and, when `PINCHTAB_TOKEN` is set, `server.token` is overwritten with it.
+`docker-entrypoint.sh` checks and initializes the binary's config path, `$HOME/.pinchtab/config.json` (`/data/.pinchtab/config.json`). Container settings (`server.bind`, `server.port`, `server.trustProxyHeaders`) and `PINCHTAB_TOKEN` are re-applied on every start. Set `PINCHTAB_LOG_TOKEN=1` to print the generated token to the deployment log on startup; unset it after the first login.
