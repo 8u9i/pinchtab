@@ -5,7 +5,24 @@ home_dir="${HOME:-/data}"
 xdg_config_home="${XDG_CONFIG_HOME:-$home_dir/.config}"
 default_config_path="$xdg_config_home/pinchtab/config.json"
 
-mkdir -p "$home_dir" "$xdg_config_home" "$(dirname "$default_config_path")"
+# A bind-mounted data volume (Railway included) arrives owned by root. When the
+# container is started as root, take ownership and drop to the unprivileged user
+# before any config or Chrome profile is written.
+if [ "$(id -u)" = "0" ]; then
+  mkdir -p "$home_dir" "$xdg_config_home" "$(dirname "$default_config_path")"
+  pinchtab_uid="$(id -u pinchtab)"
+  for dir in "$home_dir" "$xdg_config_home"; do
+    if [ "$(stat -c %u "$dir")" != "$pinchtab_uid" ]; then
+      chown -R pinchtab:pinchtab "$dir"
+    fi
+  done
+  exec su-exec pinchtab "$0" "$@"
+fi
+
+if ! mkdir -p "$home_dir" "$xdg_config_home" "$(dirname "$default_config_path")" 2>/dev/null; then
+  echo "docker-entrypoint: cannot create $home_dir; if this is a root-owned bind mount (Railway volume), set RAILWAY_RUN_UID=0" >&2
+  exit 1
+fi
 
 # Generate a persisted config on first boot.
 # The PINCHTAB_TOKEN env var can be used to set an auth token via Docker secrets

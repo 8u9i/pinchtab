@@ -52,7 +52,8 @@ RUN apk add --no-cache \
     harfbuzz \
     ca-certificates \
     ttf-freefont \
-    dumb-init
+    dumb-init \
+    su-exec
 
 # Non-root user; /data is the persistent volume mount point
 RUN adduser -D -h /data -g '' pinchtab && \
@@ -62,6 +63,9 @@ RUN adduser -D -h /data -g '' pinchtab && \
 COPY --from=builder /build/pinchtab /usr/local/bin/pinchtab
 COPY --chmod=0755 docker-entrypoint.sh /usr/local/bin/docker-entrypoint.sh
 
+# Keep the non-root default. A bind-mounted volume (Railway included) arrives
+# root-owned, so on Railway set RAILWAY_RUN_UID=0: the entrypoint then fixes the
+# volume ownership and drops back to this user before starting the server.
 USER pinchtab
 WORKDIR /data
 
