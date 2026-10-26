@@ -14,6 +14,11 @@ const goBuildCacheMount = "--mount=type=cache,target=/root/.cache/go-build"
 
 var dockerfileWalkSkips = map[string]bool{".tools": true, "tmp": true}
 
+// dockerfileCacheMountExempt lists Dockerfiles kept free of cache mounts on
+// purpose. Railway's Dockerfile builder rejects a cache mount id that is not
+// scoped to the deploying service, and the root Dockerfile is the one it builds.
+var dockerfileCacheMountExempt = map[string]bool{"Dockerfile": true}
+
 func isDockerfileName(name string) bool {
 	return name == "Dockerfile" || strings.HasPrefix(name, "Dockerfile.") || strings.HasSuffix(name, ".Dockerfile")
 }
@@ -75,6 +80,13 @@ func TestEveryDockerfileGoBuildKeepsItsCompileCacheAcrossBuilds(t *testing.T) {
 		}
 		if strings.Contains(string(data), "go build") || strings.Contains(string(data), "go install") {
 			withGoBuild++
+		}
+		rel, err := filepath.Rel(root, path)
+		if err != nil {
+			return err
+		}
+		if dockerfileCacheMountExempt[filepath.ToSlash(rel)] {
+			return nil
 		}
 		for _, ins := range uncachedGoBuilds(string(data)) {
 			t.Errorf("%s compiles without %s, so every image build recompiles from scratch: %s", path, goBuildCacheMount, ins)
